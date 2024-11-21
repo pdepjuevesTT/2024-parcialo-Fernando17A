@@ -1,9 +1,14 @@
-import example.pepita
+import example.*
 
-describe "group of tests for pepita" {
+describe "COMPRA EN CUOTAS" {
 
-  test "pepita has initial energy" {
-    assert.equals(100, pepita.energy())
+  test "pagar con tarjeta 10 cuotas deja cuotas de 1200, pagando al final 12000" {
+    const gabriel = new Personas(formasDePago=[tarjeta],formaDePagoPreferida=tarjeta,salarioMensual=10000,mesActual=2,plata=0,plataCuentaBancaria=0)
+    const galicia = new BancoEmisor(montoMaximo = 50000, cantidadCuotas = 10, tasaDeInteres = 1.2)
+    const tarjeta = new Credito(bancoEmisor = galicia,mesDeCompra = 2)
+
+    gabriel.comprar(10000, "auto")
+
+    assert.equals(12000, gabriel.cuotasNuevas())
   }
-
 }
