@@ -54,7 +54,7 @@ class Personas{
 
 // PUNTO 3 LAS PERSONAS COBRAN Y PAGAN
 
-  method transcurrir(){
+  method transcurrirMes(){
     var salarioNuevo = self.salarioMensual()
 
     mesActual += 1
@@ -82,6 +82,18 @@ class Personas{
   method montoCuotasSinPagar() = cuotasVencidas.sum()
 
   // PUNTO 5
+
+  method verificarEstadoCrediticio() = cuotasVencidas.size() == 0
+}
+
+class NuevoCredito inherits Credito{
+
+  // EL ESTADO CREDITICIO ES true EN CASO DE QUE LA PERSONA NO TENGA CUOTAS VENCIDAS,
+  // SI TIENE CUOTAS VENCIDAS ENTONCES DEBE SER false, QUIEN TENGA ESTADO CREDITICIO MALO (false)
+  // NO PUEDE REALIZAR COMPRAS CON CREDITO, ADEMAS DEBE CUMPLIR CON EL REQUISITO DE QUE EL MONTO DE
+  // LA COMPRA NO DEBE SUPERAR EN MONTO MAXIMO QUE PERMITE EL BANCO
+
+  override method cubreCosto(persona,monto) = (monto <= bancoEmisor.montoMaximo()) && persona.verificarEstadoCrediticio()
 }
 
 class MetodosDePago{
@@ -124,6 +136,41 @@ class bancoEmisor {
 
 // SEGUNDA PARTE
 
+class CompradoresCompulsivos inherits Personas{
 
+  override method comprar(monto,cosaParaComprar){
+    if(self.puedeComprar(monto)){
+      cosasCompradas.add(cosaParaComprar)
+      formaDePagoPreferida.comprar(self,monto)
+    }
+    else
+      if(self.otroMetodoPuedePagar(monto))
+        self.cambiarFormaDePagoPreferida(formasDePago.any{formaDePago => formaDePago.cubreCosto(self, monto)})
+        self.comprar(monto,cosaParaComprar)
+  }
+  
+  method cambiarFormaDePagoPreferida(nueva){
+    formaDePagoPreferida = nueva
+  }
 
+  override method puedeComprar(monto) = formaDePagoPreferida.cubreCosto(self,monto)
+
+  method otroMetodoPuedePagar(monto) = formasDePago.any{formaDePago => formaDePago.cubreCosto(self, monto)}
+}
+
+class PagadoresCompulsivos inherits Personas{
+
+  override method transcurrirMes(){
+    super()
+    if(self.puedoPagarConEfectivo()){
+      cuotasVencidas.removeAllSuchThat{ cuota =>
+        self.puedoPagarCon(plata,cuota)
+        plata -= cuota
+      }
+    }
+
+  }
+
+  method puedoPagarConEfectivo() = plata >= cuotasVencidas.head()
+}
 // HACER 2 TESTS UNO DE UNA COMPRA EN CUOTAS Y OTRO DE COBRAR SUELDOS
