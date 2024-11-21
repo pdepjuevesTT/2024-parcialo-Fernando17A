@@ -17,6 +17,8 @@ class Personas{
 
 // METODOS NECESARIOS
 
+  method cuotasNuevas() = cuotasPagar.sum()
+
   method mesActual() = mesActual
 
   method ganar(cantidad) {
@@ -97,6 +99,8 @@ class NuevoCredito inherits Credito{
 }
 
 class MetodosDePago{
+
+
   method cubreCosto(persona,monto) = persona.plata() >= monto
 }
 
@@ -123,12 +127,14 @@ class Credito inherits MetodosDePago{
   var mesDeCompra
 
   method comprar(persona,monto){
-    (bancoEmisor.cantidadCuotas()).times(persona.agregarCuotasParaPagar(monto/(bancoEmisor.cantidadCuotas())*bancoEmisor.tasaDeInteres()))
-    mesDeCompra = persona.mesActual()
+    if(self.cubreCosto(persona,monto)){
+      (bancoEmisor.cantidadCuotas()).times{persona.agregarCuotasParaPagar(monto/(bancoEmisor.cantidadCuotas())*bancoEmisor.tasaDeInteres())}
+      mesDeCompra = persona.mesActual()
+    }
   }
 }
 
-class bancoEmisor {
+class BancoEmisor {
   const property montoMaximo
   var property cantidadCuotas
   const property tasaDeInteres
@@ -173,4 +179,4 @@ class PagadoresCompulsivos inherits Personas{
 
   method puedoPagarConEfectivo() = plata >= cuotasVencidas.head()
 }
-// HACER 2 TESTS UNO DE UNA COMPRA EN CUOTAS Y OTRO DE COBRAR SUELDOS
+// HACER 2 TESTS: UNO DE UNA COMPRA EN CUOTAS Y OTRO DE COBRAR SUELDOS
